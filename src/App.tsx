@@ -217,13 +217,34 @@ const STOCKS: StockData[] = [
 function App() {
   const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [currentTime, setCurrentTime] = useState('');
 
-  // 初始化主題
+  // 初始化主題與時間
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
       setIsDarkMode(false);
     }
+
+    // 設定臺灣日期時間格式
+    const updateTime = () => {
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat('zh-TW', {
+        timeZone: 'Asia/Taipei',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      setCurrentTime(formatter.format(now).replace(/\//g, '-'));
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const toggleTheme = () => {
@@ -264,7 +285,6 @@ function App() {
             <button 
               onClick={toggleTheme}
               className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'bg-[#2a2e39] text-yellow-400 hover:bg-[#363a45]' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-              title={isDarkMode ? "切換至淺色模式" : "切換至深色模式"}
             >
               {isDarkMode ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,10 +299,10 @@ function App() {
 
             <div className={`hidden sm:flex items-center gap-2 text-xs font-semibold ${theme.textMuted}`}>
               <span className="w-2 h-2 bg-[#089981] rounded-full animate-pulse"></span>
-              MARKET OPEN
+              TAIWAN TIME
             </div>
-            <div className={`${theme.textMuted} text-xs font-bold ${isDarkMode ? 'bg-[#2a2e39]' : 'bg-slate-100'} px-2 py-1 rounded`}>
-              2026-02-09
+            <div className={`${theme.textMuted} text-xs font-bold ${isDarkMode ? 'bg-[#2a2e39]' : 'bg-slate-100'} px-3 py-1.5 rounded tabular-nums border ${theme.border}`}>
+              {currentTime || 'Loading...'}
             </div>
           </div>
         </div>
@@ -450,15 +470,6 @@ function App() {
            </div>
         </div>
       </main>
-
-      {/* Floating Action Button for Mobile */}
-      <div className="fixed bottom-6 right-6 md:hidden">
-        <button className="w-14 h-14 bg-[#2962ff] rounded-full shadow-lg flex items-center justify-center text-white active:scale-90 transition-transform">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      </div>
 
       <footer className="mt-10 text-center px-4">
         <p className={`${theme.textMuted} text-[9px] font-bold tracking-[0.3em] uppercase opacity-50`}>
